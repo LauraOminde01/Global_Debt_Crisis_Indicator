@@ -11,12 +11,8 @@ st.set_page_config(
     layout="wide"
 )
 
-# ============================================
-# LOAD DATA — absolute paths, no ../  issues
-# ============================================
 @st.cache_data
 def load_data():
-    # Use path relative to app.py location — works both locally and on Streamlit Cloud
     base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
     df = pd.read_csv(os.path.join(base, 'debt_features.csv'))
     df_latest = pd.read_csv(os.path.join(base, 'debt_risk_latest.csv'))
@@ -45,10 +41,7 @@ def risk_tier(score):
     else:
         return 'Low Risk'
 
-# ============================================
-# SIDEBAR
-# ============================================
-st.sidebar.title("💰 Global Debt Crisis Indicator")
+st.sidebar.title(" Global Debt Crisis Indicator")
 st.sidebar.markdown("Tracking debt distress risk across 178 countries using World Bank data.")
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Data source:** World Bank Open Data API")
@@ -60,11 +53,8 @@ page = st.sidebar.radio(
     ["Overview", "Country Explorer", "Country Comparison", "World Map", "Methodology"]
 )
 
-# ============================================
-# PAGE 0 — OVERVIEW
-# ============================================
 if page == "Overview":
-    st.title("Global Debt Crisis Indicator")
+    st.title(" Global Debt Crisis Indicator")
     st.markdown(
         "Tracking which countries are approaching debt distress using 5 World Bank indicators — "
         "external debt burden, debt service costs, GDP growth, foreign reserves, and inflation. "
@@ -125,9 +115,6 @@ if page == "Overview":
         worsening.columns = ['Country', 'Risk Score', 'Risk Tier', 'Trend (slope)']
         st.dataframe(worsening, use_container_width=True)
 
-# ============================================
-# PAGE 1 — COUNTRY EXPLORER
-# ============================================
 elif page == "Country Explorer":
     st.title("Country Explorer")
     st.markdown("Explore any country's debt risk profile, historical trend, and 2027 forecast.")
@@ -157,7 +144,6 @@ elif page == "Country Explorer":
     country_valid = country_data.dropna(subset=['debt_risk_score'])
     if len(country_valid) > 0:
         fig = go.Figure()
-
         fig.add_trace(go.Scatter(
             x=country_valid['year'],
             y=country_valid['debt_risk_score'],
@@ -197,7 +183,6 @@ elif page == "Country Explorer":
         st.plotly_chart(fig, use_container_width=True)
 
         col1, col2 = st.columns(2)
-
         with col1:
             st.subheader("Raw Indicator Values")
             indicators = country_data[['year', 'external_debt_pct_gni',
@@ -210,16 +195,12 @@ elif page == "Country Explorer":
             if len(country_latest) > 0:
                 row = country_latest.iloc[0]
                 percentile = (df_latest['debt_risk_score'] < row['debt_risk_score']).mean() * 100
-                st.metric("Risk Percentile", f"{percentile:.0f}th",
-                          help="What % of countries have a lower risk score")
+                st.metric("Risk Percentile", f"{percentile:.0f}th")
                 st.markdown(f"**{selected_country}** has a higher debt risk score than "
                             f"**{percentile:.0f}%** of tracked countries.")
     else:
         st.warning(f"No debt risk score data available for {selected_country}")
 
-# ============================================
-# PAGE 2 — COUNTRY COMPARISON
-# ============================================
 elif page == "Country Comparison":
     st.title("Compare Countries")
     st.markdown("Select 2-4 countries to compare their debt risk trajectories side by side.")
@@ -258,18 +239,13 @@ elif page == "Country Comparison":
         ].copy()
         comp.columns = ['Country', 'Current Score', '2027 Forecast', 'Change', 'Current Tier', '2027 Tier']
         st.dataframe(comp, use_container_width=True)
-
     else:
         st.info("Select at least 2 countries to compare")
 
-# ============================================
-# PAGE 3 — WORLD MAP
-# ============================================
 elif page == "World Map":
     st.title("Global Debt Risk Map")
 
     map_data = df_latest.dropna(subset=['debt_risk_score', 'iso_code'])
-
     fig = px.choropleth(
         map_data,
         locations='iso_code',
@@ -292,12 +268,8 @@ elif page == "World Map":
                                    'Expected Change', 'Current Tier', '2027 Tier']
     st.dataframe(worsening_forecast, use_container_width=True)
 
-# ============================================
-# PAGE 4 — METHODOLOGY
-# ============================================
 elif page == "Methodology":
     st.title("Methodology and Limitations")
-
     st.markdown("""
     ### Data Source
     **World Bank Open Data API** — no API key required, updated annually.
@@ -315,7 +287,6 @@ elif page == "Methodology":
     ### Risk Score Construction
     Each indicator is normalized to a 0–100 percentile rank across all countries and years.
     The composite score is the mean of available indicators (minimum 3 of 5 required).
-    Higher scores indicate higher debt distress risk.
 
     ### Risk Tiers
     - **High Risk:** score ≥ 75
@@ -323,25 +294,18 @@ elif page == "Methodology":
     - **Moderate Risk:** score 25–49
     - **Low Risk:** score < 25
 
-    ### Forecasting Approach
-    Per-country linear trend model trained on historical data, validated by training through
-    2018 and testing against actual 2019–2024 values.
-
-    **Median validation error: 11.94 points** on a 0–100 scale. Debt distress indicators
-    are inherently volatile — debt restructuring, IMF interventions, or currency crises
-    cause non-linear jumps that linear trends cannot anticipate. Forecasts should be read
-    as directional signals, not precise predictions.
+    ### Forecasting
+    Per-country linear trend model, validated by training through 2018 and testing against
+    actual 2019–2024 values. **Median validation error: 11.94 points** on a 0–100 scale.
+    Forecasts are directional signals, not precise predictions.
 
     ### Kenya Context
     Kenya scores **54.95/100 (Elevated Risk)** with a slightly improving trend,
-    reflecting its external debt of 34.99% of GNI and high debt service ratio of 27.2%
-    of exports — partially offset by 4.7% GDP growth. Forecast to remain in Elevated
-    Risk through 2027.
+    reflecting external debt of 34.99% of GNI and debt service ratio of 27.2% of exports,
+    partially offset by 4.7% GDP growth. Forecast to remain Elevated Risk through 2027.
 
     ### Known Limitations
-    - Ireland and some high-income countries score unexpectedly high due to GDP distortions
-      from multinational corporate activity
-    - Guam and other non-sovereign territories appear in the dataset despite not having
-      independent debt policy — treat their scores with caution
-    - Linear trends cannot anticipate policy shifts, debt restructuring, or economic shocks
+    - Ireland scores unexpectedly high due to GDP distortions from multinational activity
+    - Non-sovereign territories (Guam, Bermuda) appear despite lacking independent debt policy
+    - Linear trends cannot anticipate debt restructuring, IMF interventions, or economic shocks
     """)
