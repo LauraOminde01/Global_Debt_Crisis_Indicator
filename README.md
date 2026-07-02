@@ -8,7 +8,7 @@ Global debt levels have reached historic highs. For developing countries especia
 
 ## Live Dashboard
 
-[Add Streamlit URL once deployed]
+https://global-debt.streamlit.app/
 
 ## What the Dashboard Shows
 
