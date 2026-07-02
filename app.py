@@ -13,24 +13,28 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+    possible_bases = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data'),
+        '/mount/src/global_debt_crisis_indicator/data',
+        'data'
+    ]
+    
+    base = None
+    for path in possible_bases:
+        if os.path.exists(os.path.join(path, 'debt_features.csv')):
+            base = path
+            break
+    
+    if base is None:
+        st.error(f"Could not find data folder. Tried: {possible_bases}")
+        st.stop()
+    
     df = pd.read_csv(os.path.join(base, 'debt_features.csv'))
     df_latest = pd.read_csv(os.path.join(base, 'debt_risk_latest.csv'))
     forecast_df = pd.read_csv(os.path.join(base, 'debt_forecasts_2027.csv'))
     return df, df_latest, forecast_df
 
 df, df_latest, forecast_df = load_data()
-import os
-
-# Debug — show exactly what path is being constructed
-base_debug = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
-st.write(f"Looking for data in: {base_debug}")
-st.write(f"Files found: {os.listdir(base_debug) if os.path.exists(base_debug) else 'PATH DOES NOT EXIST'}")
-
-# Also show the repo root
-root_debug = os.path.dirname(os.path.abspath(__file__))
-st.write(f"App file location: {root_debug}")
-st.write(f"Repo root contents: {os.listdir(os.path.join(root_debug, '..'))}")
 
 color_map = {
     'High Risk': '#e74c3c',
