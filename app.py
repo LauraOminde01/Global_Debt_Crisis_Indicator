@@ -20,6 +20,17 @@ def load_data():
     return df, df_latest, forecast_df
 
 df, df_latest, forecast_df = load_data()
+import os
+
+# Debug — show exactly what path is being constructed
+base_debug = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+st.write(f"Looking for data in: {base_debug}")
+st.write(f"Files found: {os.listdir(base_debug) if os.path.exists(base_debug) else 'PATH DOES NOT EXIST'}")
+
+# Also show the repo root
+root_debug = os.path.dirname(os.path.abspath(__file__))
+st.write(f"App file location: {root_debug}")
+st.write(f"Repo root contents: {os.listdir(os.path.join(root_debug, '..'))}")
 
 color_map = {
     'High Risk': '#e74c3c',
