@@ -16,13 +16,12 @@ st.set_page_config(
 # ============================================
 @st.cache_data
 def load_data():
-    base = r"C:\Users\ICTServices\Desktop\Global Debt Crisis Indicator\data"
+    # Use path relative to app.py location — works both locally and on Streamlit Cloud
+    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
     df = pd.read_csv(os.path.join(base, 'debt_features.csv'))
     df_latest = pd.read_csv(os.path.join(base, 'debt_risk_latest.csv'))
     forecast_df = pd.read_csv(os.path.join(base, 'debt_forecasts_2027.csv'))
     return df, df_latest, forecast_df
-
-df, df_latest, forecast_df = load_data()
 
 color_map = {
     'High Risk': '#e74c3c',
