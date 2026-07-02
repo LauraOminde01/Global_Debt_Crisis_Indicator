@@ -21,7 +21,7 @@ def load_data():
     df = pd.read_csv(os.path.join(base, 'debt_features.csv'))
     df_latest = pd.read_csv(os.path.join(base, 'debt_risk_latest.csv'))
     forecast_df = pd.read_csv(os.path.join(base, 'debt_forecasts_2027.csv'))
-       return df, df_latest, forecast_df
+    return df, df_latest, forecast_df
 
 df, df_latest, forecast_df = load_data()
 
